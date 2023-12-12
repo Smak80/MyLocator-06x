@@ -26,6 +26,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -69,7 +71,7 @@ class MainActivity : ComponentActivity() {
                     Modifier.fillMaxSize()
                 )
                 mvm.showRequestDialog =
-                    !isPermissionsGranted(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION, context = this)
+                    !mvm.isPermissionsGranted(ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION, context = this)
                 if (mvm.showRequestDialog){
                     LocationRequestDialog(
                         onDeny = {
@@ -90,10 +92,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun isPermissionsGranted(vararg permissions: String, context: Context) =
-        permissions.fold(true) { acc, perm ->
-            acc && context.checkSelfPermission(perm) == PackageManager.PERMISSION_GRANTED
-        }
+    override fun onResume() {
+        super.onResume()
+        if (mvm.requestLocationUpdates) mvm.startLocationUpdates()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mvm.stopLocationUpdates()
+    }
 }
 
 @Composable
@@ -101,8 +108,10 @@ fun MainUI(
     mvm: MainViewModel,
     modifier: Modifier = Modifier,
 ){
+    val loc by mvm.location.collectAsState()
+    val locStr = loc?.let{ "Lat: ${it.latitude} Lon: ${it.longitude}" } ?: "Unknown location"
     Text(
-        text = mvm.location,
+        text = locStr,
     )
 }
 
