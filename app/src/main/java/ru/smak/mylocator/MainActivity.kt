@@ -47,15 +47,14 @@ class MainActivity : ComponentActivity() {
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
+        mvm.showRequestDialog = false
         when {
             permissions.getOrDefault(ACCESS_FINE_LOCATION, false) -> {
-                mvm.showRequestDialog = false
+
             }
             permissions.getOrDefault(ACCESS_COARSE_LOCATION, false) -> {
-                mvm.showRequestDialog = false
             }
             else -> {
-                mvm.showRequestDialog = false
                 finish()
             }
         }
